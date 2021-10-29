@@ -61,7 +61,7 @@ class ParkingDataBaseIT {
   void testParkingACar() {
     // GIVEN
     when(inputReaderUtil.readSelection()).thenReturn(1);
-    //Parking a car with registration ABCDEF
+    // Parking a car with registration ABCDEF
     ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
 
     // WHEN
@@ -78,7 +78,7 @@ class ParkingDataBaseIT {
     assertThat(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).isNotEqualTo(1);
   }
 
-  @DisplayName("Exiting a parking lot")
+  @DisplayName("Exiting a car park for one hour")
   @Test
   void testParkingLotExit() {
     // GIVEN
@@ -91,20 +91,59 @@ class ParkingDataBaseIT {
     currentTicket.setPrice(0);
     ticketDAO.saveTicket(currentTicket);
     parkingSpotDAO.updateParking(parkingSpot);
-    //A car parked for an hour at parking spot 1 with registration ABCDEF
+    // A car parked for an hour at parking spot 1 with registration ABCDEF
     ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    double expectedFare = Fare.CAR_RATE_PER_HOUR;
 
     // WHEN
     parkingService.processExitingVehicle();
 
     // THEN
     Ticket savedTicket = ticketDAO.getTicket("ABCDEF");
-    assertThat(savedTicket)
-            .extracting(ticket -> ticket.getParkingSpot(), ticket -> ticket.getVehicleRegNumber(),
-                    ticket -> ticket.getPrice())
-            .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF",
-                    Fare.CAR_RATE_PER_HOUR);
+    assertThat(savedTicket).extracting(ticket -> ticket.getParkingSpot(),
+            ticket -> ticket.getVehicleRegNumber(), ticket -> ticket.getPrice())
+            .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF", expectedFare);
     assertThat(savedTicket.getInTime()).isNotNull();
     assertThat(savedTicket.getOutTime()).isNotNull();
   }
+
+  @DisplayName("Exiting a recurring user's car park for one hour ")
+  @Test
+  void testParkingLotExitRecurringUser() {
+    // GIVEN
+    Ticket previousTicket = new Ticket();
+    previousTicket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
+    previousTicket.setVehicleRegNumber("ABCDEF");
+    previousTicket.setInTime(LocalDateTime.now().minusWeeks(1).minusMinutes(60));
+    previousTicket.setOutTime(LocalDateTime.now().minusWeeks(1));
+    previousTicket.setPrice(Fare.CAR_RATE_PER_HOUR);
+    ticketDAO.saveTicket(previousTicket);
+    // A ticket of a previously parked and exited car with registration ABCDEF
+
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+    Ticket currentTicket = new Ticket();
+    currentTicket.setParkingSpot(parkingSpot);
+    currentTicket.setVehicleRegNumber("ABCDEF");
+    currentTicket.setInTime(LocalDateTime.now().minusMinutes(60));
+    currentTicket.setOutTime(null);
+    currentTicket.setPrice(0);
+    ticketDAO.saveTicket(currentTicket);
+    parkingSpotDAO.updateParking(parkingSpot);
+    // A car parked for an hour at parking spot 1 with registration ABCDEF
+    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    double expectedFare = Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * 5 / 100);
+    // Expected a 5% discount
+
+    // WHEN
+    parkingService.processExitingVehicle();
+
+    // THEN
+    Ticket savedTicket = ticketDAO.getTicket("ABCDEF");
+    assertThat(savedTicket).extracting(ticket -> ticket.getParkingSpot(),
+            ticket -> ticket.getVehicleRegNumber(), ticket -> ticket.getPrice())
+            .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF", expectedFare);
+    assertThat(savedTicket.getInTime()).isNotNull();
+    assertThat(savedTicket.getOutTime()).isNotNull();
+  }
+
 }
