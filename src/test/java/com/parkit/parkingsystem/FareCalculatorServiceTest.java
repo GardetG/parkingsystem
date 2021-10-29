@@ -33,7 +33,7 @@ class FareCalculatorServiceTest {
 
   @DisplayName("calculateFare method test")
   @Nested
-  class calculateFareTest {
+  class CalculateFareTest {
 
     @BeforeEach
     private void setUpPerTest() {
@@ -45,11 +45,12 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate bike fare")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
             + Fare.BIKE_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1", "1440,24" })
+    @CsvSource({ "0,0", "45,0.75", "60,1","90,1.5" ,"1440,24" })
     void calculateFareBike(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
       ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.BIKE, false);
+
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
       double expectedFare = expectedMultiplier * Fare.BIKE_RATE_PER_HOUR;
@@ -64,11 +65,12 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate car fare")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
             + Fare.CAR_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1", "1440,24" })
+    @CsvSource({ "0,0", "45,0.75", "60,1","90,1.5", "1440,24" })
     void calculateFareCar(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
       ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
       double expectedFare = expectedMultiplier * Fare.CAR_RATE_PER_HOUR;
@@ -157,17 +159,11 @@ class FareCalculatorServiceTest {
 
   @DisplayName("calculateDuration method test")
   @Nested
-  class calculateDurationTest {
-
-    @BeforeEach
-    private void setUpPerTest() {
-      outTime = LocalDateTime.now();
-      inTime = null;
-    }
+  class CalculateDurationTest {
 
     @DisplayName("calculate duration")
     @ParameterizedTest(name = "Duration for {0} minutes should equal to {1}")
-    @CsvSource({ "0,0", "15,0.25", "30,0.5", "45,0.75", "60,1", "1440,24" })
+    @CsvSource({ "0,0", "15,0.25", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateDuration(int numberOfMinutes, double expectedDuration) {
       // GIVEN
       outTime = LocalDateTime.now();
