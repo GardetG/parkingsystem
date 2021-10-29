@@ -1,6 +1,7 @@
 package com.parkit.parkingsystem;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,14 +86,16 @@ class TicketDAOTest {
     }
     logCaptor = LogCaptor.forName("TicketDAO");
     logCaptor.setLogLevelToInfo();
+    ticket = null;
 
     // WHEN
     boolean result = ticketDAO.saveTicket(ticket);
 
     // THEN
     assertThat(result).isFalse();
-    assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
+    verify(dataBaseConfig, times(1)).closePreparedStatement(ps);
     verify(dataBaseConfig, times(1)).closeConnection(connection);
+    assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
   }
 
   @Test
@@ -112,8 +115,9 @@ class TicketDAOTest {
 
     // THEN
     assertThat(result).isFalse();
-    assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
+    verify(dataBaseConfig, times(1)).closePreparedStatement(any());
     verify(dataBaseConfig, times(1)).closeConnection(connection);
+    assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
   }
 
   @Test
@@ -179,8 +183,10 @@ class TicketDAOTest {
 
     // THEN
     assertThat(ticket).isNull();
-    assertThat(logCaptor.getErrorLogs()).containsExactly("Error fetching ticket info");
+    verify(dataBaseConfig, times(1)).closeResultSet(any());
+    verify(dataBaseConfig, times(1)).closePreparedStatement(any());
     verify(dataBaseConfig, times(1)).closeConnection(connection);
+    assertThat(logCaptor.getErrorLogs()).containsExactly("Error fetching ticket info");
   }
 
   @Test
@@ -219,14 +225,16 @@ class TicketDAOTest {
     }
     logCaptor = LogCaptor.forName("TicketDAO");
     logCaptor.setLogLevelToInfo();
+    ticket = null;
 
     // WHEN
     boolean result = ticketDAO.updateTicket(ticket);
 
     // THEN
     assertThat(result).isFalse();
-    assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating ticket info");
+    verify(dataBaseConfig, times(1)).closePreparedStatement(ps);
     verify(dataBaseConfig, times(1)).closeConnection(connection);
+    assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating ticket info");
   }
 
   @Test
@@ -246,7 +254,8 @@ class TicketDAOTest {
 
     // THEN
     assertThat(result).isFalse();
-    assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating ticket info");
+    verify(dataBaseConfig, times(1)).closePreparedStatement(any());
     verify(dataBaseConfig, times(1)).closeConnection(connection);
+    assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating ticket info");
   }
 }
