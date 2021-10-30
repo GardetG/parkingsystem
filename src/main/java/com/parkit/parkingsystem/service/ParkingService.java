@@ -46,7 +46,7 @@ public class ParkingService {
   public void processIncomingVehicle() {
     try {
       ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
-      if (parkingSpot != null && parkingSpot.getId() > 0) {
+      if (parkingSpot != null) {
         String vehicleRegNumber = getVehichleRegNumber();
         parkingSpot.setAvailable(false);
         parkingSpotDAO.updateParking(parkingSpot);
@@ -62,6 +62,11 @@ public class ParkingService {
         ticket.setOutTime(null);
         ticketDAO.saveTicket(ticket);
         System.out.println("Generated Ticket and saved in DB");
+        if (userSurveyService.isRecurringUser(vehicleRegNumber)) {
+          System.out.println(
+                  "Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+          logger.info("Recurring user incomming");
+        }
         System.out.println("Please park your vehicle in spot number:" + parkingSpot.getId());
         System.out.println(
                 "Recorded in-time for vehicle number:" + vehicleRegNumber + " is:" + inTime);
@@ -81,7 +86,7 @@ public class ParkingService {
    * provide by the user and return a ParkingSpot. In case of error parsing the
    * user input or fetching an available spot then the method return null.
    * 
-   * 
+
    * @return next available ParkingSpot
    */
   public ParkingSpot getNextParkingNumberIfAvailable() {
@@ -142,6 +147,7 @@ public class ParkingService {
                 + " is:" + outTime);
       } else {
         System.out.println("Unable to update ticket information. Error occurred");
+        logger.error("Unable to update ticket information");
       }
     } catch (Exception e) {
       logger.error("Unable to process exiting vehicle", e);
