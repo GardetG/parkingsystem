@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,7 +61,7 @@ public class TicketDAO {
 
   /**
    * Get the last ticket saved in the DataBase for the provided vehicle
-   * registration number.
+   * registration number. If no ticket found, return null.
    * 
 
    * @param vehicleRegNumber associated to the ticket
@@ -115,8 +117,8 @@ public class TicketDAO {
       ps.setDouble(1, ticket.getPrice());
       ps.setTimestamp(2, Timestamp.valueOf(ticket.getOutTime().truncatedTo(ChronoUnit.SECONDS)));
       ps.setInt(3, ticket.getId());
-      ps.execute();
-      return true;
+      int updateRowCount = ps.executeUpdate();
+      return (updateRowCount == 1);
     } catch (Exception ex) {
       logger.error("Error updating ticket info", ex);
     } finally {
@@ -124,5 +126,48 @@ public class TicketDAO {
       dataBaseConfig.closeConnection(con);
     }
     return false;
+  }
+
+  /**
+   * Get a list of all tickets saved in the DataBase for the provided vehicle
+   * registration number. If not tickets found return an empty list.
+   * 
+
+   * @param vehicleRegNumber associated to the tickets
+   * @return all tickets saved
+   */
+  public List<Ticket> getAllTickets(String vehicleRegNumber) {
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    List<Ticket> allTickets = new ArrayList<>();
+    try {
+      con = dataBaseConfig.getConnection();
+      ps = con.prepareStatement(DBConstants.GET_ALL_TICKET);
+      // ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+      ps.setString(1, vehicleRegNumber);
+      rs = ps.executeQuery();
+      while (rs.next()) {
+        Ticket ticket = new Ticket();
+        ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1),
+                ParkingType.valueOf(rs.getString(6)), false);
+        ticket.setParkingSpot(parkingSpot);
+        ticket.setId(rs.getInt(2));
+        ticket.setVehicleRegNumber(vehicleRegNumber);
+        ticket.setPrice(rs.getDouble(3));
+        ticket.setInTime(rs.getTimestamp(4).toLocalDateTime());
+        ticket.setOutTime(
+                (rs.getTimestamp(5) == null) ? null : rs.getTimestamp(5).toLocalDateTime());
+        allTickets.add(ticket);
+      }
+
+    } catch (Exception ex) {
+      logger.error("Error fetching all ticket info", ex);
+    } finally {
+      dataBaseConfig.closeResultSet(rs);
+      dataBaseConfig.closePreparedStatement(ps);
+      dataBaseConfig.closeConnection(con);
+    }
+    return allTickets;
   }
 }
