@@ -22,7 +22,9 @@ import com.parkit.parkingsystem.integration.config.DataBaseTestConfig;
 import com.parkit.parkingsystem.integration.service.DataBasePrepareService;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
+import com.parkit.parkingsystem.service.UserSurveyService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +34,8 @@ class ParkingDataBaseIT {
   private static ParkingSpotDAO parkingSpotDAO;
   private static TicketDAO ticketDAO;
   private static DataBasePrepareService dataBasePrepareService;
+  private static FareCalculatorService fareCalculatorService;
+  private static UserSurveyService userSurveyService;
 
   @Mock
   private static InputReaderUtil inputReaderUtil;
@@ -42,6 +46,8 @@ class ParkingDataBaseIT {
     parkingSpotDAO.dataBaseConfig = dataBaseTestConfig;
     ticketDAO = new TicketDAO();
     ticketDAO.dataBaseConfig = dataBaseTestConfig;
+    userSurveyService = new UserSurveyService(ticketDAO);
+    fareCalculatorService = new FareCalculatorService(userSurveyService);
     dataBasePrepareService = new DataBasePrepareService();
   }
 
@@ -62,7 +68,8 @@ class ParkingDataBaseIT {
     // GIVEN
     when(inputReaderUtil.readSelection()).thenReturn(1);
     // Parking a car with registration ABCDEF
-    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
+            userSurveyService, parkingSpotDAO, ticketDAO);
 
     // WHEN
     parkingService.processIncomingVehicle();
@@ -92,7 +99,8 @@ class ParkingDataBaseIT {
     ticketDAO.saveTicket(currentTicket);
     parkingSpotDAO.updateParking(parkingSpot);
     // A car parked for an hour at parking spot 1 with registration ABCDEF
-    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
+            userSurveyService, parkingSpotDAO, ticketDAO);
     double expectedFare = Fare.CAR_RATE_PER_HOUR;
 
     // WHEN
@@ -130,7 +138,8 @@ class ParkingDataBaseIT {
     ticketDAO.saveTicket(currentTicket);
     parkingSpotDAO.updateParking(parkingSpot);
     // A car parked for an hour at parking spot 1 with registration ABCDEF
-    ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+    ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
+            userSurveyService, parkingSpotDAO, ticketDAO);
     double expectedFare = Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * 5 / 100);
     // Expected a 5% discount
 

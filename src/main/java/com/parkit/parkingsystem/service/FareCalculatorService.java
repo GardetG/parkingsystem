@@ -12,12 +12,18 @@ import com.parkit.parkingsystem.model.Ticket;
  *
  */
 public class FareCalculatorService {
+  
+  private UserSurveyService userSurveyService;
+
+  public FareCalculatorService(UserSurveyService userSurveyService) {
+    this.userSurveyService = userSurveyService;
+  }
 
   /**
    * Calculate and set the price of the provided ticket according to the parking
    * type and the parking duration.
    * 
-   * 
+
    * @param ticket for which we want to calculate the price.
    */
   public void calculateFare(Ticket ticket) throws IllegalArgumentException, NullPointerException {
@@ -40,7 +46,7 @@ public class FareCalculatorService {
    * hours passed. If the duration is less than one hour, the return value is the
    * fraction of the passed hour.
    * 
-   * 
+
    * @param inTime  for the calculate duration
    * @param outTime for the calculate duration
    * @return duration

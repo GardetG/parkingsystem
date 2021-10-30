@@ -19,7 +19,9 @@ import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
 import com.parkit.parkingsystem.service.ParkingService;
+import com.parkit.parkingsystem.service.UserSurveyService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,6 +35,10 @@ class ParkingServiceTest {
   private static ParkingSpotDAO parkingSpotDAO;
   @Mock
   private static TicketDAO ticketDAO;
+  @Mock
+  private static FareCalculatorService fareCalculatorService;
+  @Mock
+  private static UserSurveyService userSurveyService;
 
   @BeforeEach
   private void setUpPerTest() {
@@ -49,7 +55,8 @@ class ParkingServiceTest {
 
       when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
 
-      parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
+      parkingService = new ParkingService(inputReaderUtil, fareCalculatorService, userSurveyService,
+              parkingSpotDAO, ticketDAO);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");

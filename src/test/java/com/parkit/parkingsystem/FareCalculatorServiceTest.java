@@ -12,12 +12,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
 
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.FareCalculatorService;
+import com.parkit.parkingsystem.service.UserSurveyService;
 
 class FareCalculatorServiceTest {
 
@@ -26,9 +28,12 @@ class FareCalculatorServiceTest {
   private LocalDateTime inTime;
   private LocalDateTime outTime;
 
+  @Mock
+  private static UserSurveyService userSurveyService;
+
   @BeforeAll
   private static void setUp() {
-    fareCalculatorService = new FareCalculatorService();
+    fareCalculatorService = new FareCalculatorService(userSurveyService);
   }
 
   @DisplayName("calculateFare method test")
@@ -45,7 +50,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate bike fare")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
             + Fare.BIKE_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1","90,1.5" ,"1440,24" })
+    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBike(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -65,7 +70,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate car fare")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
             + Fare.CAR_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1","90,1.5", "1440,24" })
+    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCar(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
