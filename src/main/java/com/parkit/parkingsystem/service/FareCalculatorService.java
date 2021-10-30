@@ -13,26 +13,39 @@ import com.parkit.parkingsystem.model.Ticket;
  */
 public class FareCalculatorService {
 
+  private UserSurveyService userSurveyService;
+
+  public FareCalculatorService(UserSurveyService userSurveyService) {
+    this.userSurveyService = userSurveyService;
+  }
+
   /**
    * Calculate and set the price of the provided ticket according to the parking
    * type and the parking duration.
    * 
-   * 
+
    * @param ticket for which we want to calculate the price.
    */
   public void calculateFare(Ticket ticket) throws IllegalArgumentException, NullPointerException {
     double duration = calculateDuration(ticket.getInTime(), ticket.getOutTime());
 
+    double price;
     switch (ticket.getParkingSpot().getParkingType()) {
       case CAR:
-        ticket.setPrice(duration * Fare.CAR_RATE_PER_HOUR);
+        price = duration * Fare.CAR_RATE_PER_HOUR;
         break;
       case BIKE:
-        ticket.setPrice(duration * Fare.BIKE_RATE_PER_HOUR);
+        price = duration * Fare.BIKE_RATE_PER_HOUR;
         break;
       default:
         throw new IllegalArgumentException("Unkown Parking Type");
     }
+    
+    if (userSurveyService.isRecurringUser(ticket.getVehicleRegNumber())) {
+      price -= price * 5.0/100; 
+    }
+    
+    ticket.setPrice(price);
   }
 
   /**
@@ -40,7 +53,7 @@ public class FareCalculatorService {
    * hours passed. If the duration is less than one hour, the return value is the
    * fraction of the passed hour.
    * 
-   * 
+
    * @param inTime  for the calculate duration
    * @param outTime for the calculate duration
    * @return duration
@@ -56,6 +69,6 @@ public class FareCalculatorService {
 
     Duration duration = Duration.between(inTime, outTime);
 
-    return  duration.toMinutes() / 60.0;
+    return duration.toMinutes() / 60.0;
   }
 }

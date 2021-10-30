@@ -69,6 +69,27 @@ class ParkingSpotDAOTest {
   }
 
   @Test
+  void updateParkingWhenParkingSpotNotFoundTest() {
+    // GIVEN
+    try {
+      when(connection.prepareStatement(anyString())).thenReturn(ps);
+      when(ps.executeUpdate()).thenReturn(0);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException("Failed to set up test mock objects");
+    }
+    ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
+
+    // WHEN
+    boolean result = parkingSpotDAO.updateParking(parkingSpot);
+
+    // THEN
+    assertThat(result).isFalse();
+    verify(dataBaseConfig, times(1)).closePreparedStatement(ps);
+    verify(dataBaseConfig, times(1)).closeConnection(connection);
+  }
+
+  @Test
   void updateWithNullParkingTest() {
     // GIVEN
     try {
