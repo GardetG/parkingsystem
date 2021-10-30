@@ -140,7 +140,7 @@ class ParkingDataBaseIT {
     // A car parked for an hour at parking spot 1 with registration ABCDEF
     ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
             userSurveyService, parkingSpotDAO, ticketDAO);
-    double expectedFare = Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * 5 / 100);
+    double expectedFare = Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * 5.0 / 100);
     // Expected a 5% discount
 
     // WHEN
