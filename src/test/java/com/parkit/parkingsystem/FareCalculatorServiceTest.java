@@ -3,6 +3,7 @@ package com.parkit.parkingsystem;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +58,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate bike fare")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
             + Fare.BIKE_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
+    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBike(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -77,7 +78,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate car fare")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
             + Fare.CAR_RATE_PER_HOUR)
-    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
+    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCar(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -97,7 +98,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate bike fare for a recurring user")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
             + Fare.BIKE_RATE_PER_HOUR + "minus 5%")
-    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
+    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBikeRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -105,7 +106,7 @@ class FareCalculatorServiceTest {
 
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
-      when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
+      lenient().when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
       double expectedFare = expectedMultiplier * Fare.BIKE_RATE_PER_HOUR;
       expectedFare -= expectedFare * 5.0 / 100;
 
@@ -119,7 +120,7 @@ class FareCalculatorServiceTest {
     @DisplayName("Calculate car fare for a recurring user")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
             + Fare.CAR_RATE_PER_HOUR + "minus 5%")
-    @CsvSource({ "0,0", "45,0.75", "60,1", "90,1.5", "1440,24" })
+    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCarRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -127,7 +128,7 @@ class FareCalculatorServiceTest {
 
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
-      when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
+      lenient().when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
       double expectedFare = expectedMultiplier * Fare.CAR_RATE_PER_HOUR;
       expectedFare -= expectedFare * 5.0 / 100;
 
@@ -136,7 +137,6 @@ class FareCalculatorServiceTest {
 
       // THEN
       assertThat(ticket.getPrice()).isEqualTo(expectedFare);
-      verify(userSurveyService, times(1)).isRecurringUser(anyString());
     }
 
     @DisplayName("Calculate fare with future in time")
