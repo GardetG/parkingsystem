@@ -6,22 +6,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.UserSurveyService;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 
 @ExtendWith(MockitoExtension.class)
 class UserSurveySarviceTest {
@@ -39,6 +39,7 @@ class UserSurveySarviceTest {
     allTickets = new ArrayList<>();
   }
 
+  @DisplayName("Checking recurring user when no tickets found should return false")
   @Test
   void isRecurringUserWhenNoTicketsFoundTest() {
     // GIVEN
@@ -53,6 +54,7 @@ class UserSurveySarviceTest {
     verify(ticketDAO, times(1)).getAllTickets("ABCDEF");
   }
 
+  @DisplayName("Checking recurring user when DAO return null should return false")
   @Test
   void isRecurringUserWhenDAOReturnNullTest() {
     // GIVEN
@@ -67,6 +69,7 @@ class UserSurveySarviceTest {
     verify(ticketDAO, times(1)).getAllTickets("ABCDEF");
   }
 
+  @DisplayName("Checking recurring user when only currently parked car should return false")
   @Test
   void isRecurringUserWithNoPreviouslyParkedCarTest() {
 
@@ -77,7 +80,7 @@ class UserSurveySarviceTest {
     currentTicket.setInTime(LocalDateTime.now().minusMinutes(60));
     currentTicket.setOutTime(null);
     currentTicket.setPrice(0);
-    // A ticket of a currently parked
+    // A ticket of a currently parked car without out time
     allTickets.add(currentTicket);
     when(ticketDAO.getAllTickets(anyString())).thenReturn(allTickets);
 
@@ -89,6 +92,7 @@ class UserSurveySarviceTest {
     verify(ticketDAO, times(1)).getAllTickets("ABCDEF");
   }
 
+  @DisplayName("Checking recurring user with a previous parked and exited car should return true")
   @Test
   void isRecurringUserWithPreviouslyParkedAndExitedCarTest() {
     // GIVEN
@@ -118,5 +122,4 @@ class UserSurveySarviceTest {
     assertThat(result).isTrue();
     verify(ticketDAO, times(1)).getAllTickets("ABCDEF");
   }
-
 }

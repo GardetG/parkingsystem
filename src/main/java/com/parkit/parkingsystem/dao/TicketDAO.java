@@ -1,5 +1,10 @@
 package com.parkit.parkingsystem.dao;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
+import com.parkit.parkingsystem.constants.DBConstants;
+import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.model.Ticket;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,15 +12,8 @@ import java.sql.Timestamp;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.parkit.parkingsystem.config.DataBaseConfig;
-import com.parkit.parkingsystem.constants.DBConstants;
-import com.parkit.parkingsystem.constants.ParkingType;
-import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
 
 /**
  * DAO Class for Ticket.
@@ -26,7 +24,11 @@ public class TicketDAO {
 
   private static final Logger logger = LogManager.getLogger("TicketDAO");
 
-  public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+  private DataBaseConfig dataBaseConfig;
+
+  public TicketDAO(DataBaseConfig dataBaseConfig) {
+    this.dataBaseConfig = dataBaseConfig;
+  }
 
   /**
    * Save the ticket as a new entry in the DataBase.
@@ -160,7 +162,6 @@ public class TicketDAO {
                 (rs.getTimestamp(5) == null) ? null : rs.getTimestamp(5).toLocalDateTime());
         allTickets.add(ticket);
       }
-
     } catch (Exception ex) {
       logger.error("Error fetching all ticket info", ex);
     } finally {

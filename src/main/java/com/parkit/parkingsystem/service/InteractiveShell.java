@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem.service;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.util.InputReaderUtil;
@@ -13,6 +14,10 @@ import org.apache.logging.log4j.Logger;
  */
 public class InteractiveShell {
 
+  private InteractiveShell() {
+    throw new IllegalStateException("Utility class");
+  }
+
   private static final Logger logger = LogManager.getLogger("InteractiveShell");
 
   /**
@@ -25,8 +30,9 @@ public class InteractiveShell {
 
     boolean continueApp = true;
     InputReaderUtil inputReaderUtil = new InputReaderUtil();
-    ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO();
-    TicketDAO ticketDAO = new TicketDAO();
+    DataBaseConfig dataBaseConfig = new DataBaseConfig();
+    ParkingSpotDAO parkingSpotDAO = new ParkingSpotDAO(dataBaseConfig);
+    TicketDAO ticketDAO = new TicketDAO(dataBaseConfig);
     UserSurveyService userSurveyService = new UserSurveyService(ticketDAO);
     FareCalculatorService fareCalculatorService = new FareCalculatorService(userSurveyService);
     ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,

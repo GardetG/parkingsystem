@@ -4,12 +4,11 @@ import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.constants.DBConstants;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.model.ParkingSpot;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * DAO Class for ParkingSpot.
@@ -19,7 +18,11 @@ import java.sql.ResultSet;
 public class ParkingSpotDAO {
   private static final Logger logger = LogManager.getLogger("ParkingSpotDAO");
 
-  public DataBaseConfig dataBaseConfig = new DataBaseConfig();
+  private DataBaseConfig dataBaseConfig;
+
+  public ParkingSpotDAO(DataBaseConfig dataBaseConfig) {
+    this.dataBaseConfig = dataBaseConfig;
+  }
 
   /**
    * Return the id of the next available slot for the parking type provided. If
@@ -69,7 +72,6 @@ public class ParkingSpotDAO {
       ps.setBoolean(1, parkingSpot.isAvailable());
       ps.setInt(2, parkingSpot.getId());
       int updateRowCount = ps.executeUpdate();
-
       return (updateRowCount == 1);
     } catch (Exception ex) {
       logger.error("Error updating parking info", ex);
@@ -79,5 +81,4 @@ public class ParkingSpotDAO {
       dataBaseConfig.closeConnection(con);
     }
   }
-
 }

@@ -1,10 +1,10 @@
 package com.parkit.parkingsystem.service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import org.apache.commons.math3.util.Precision;
 
 /**
  * Service Class handling the calculation of the ticket fare.
@@ -23,7 +23,7 @@ public class FareCalculatorService {
    * Calculate and set the price of the provided ticket according to the parking
    * type and the parking duration.
    * 
-   * 
+
    * @param ticket for which we want to calculate the price.
    */
   public void calculateFare(Ticket ticket) throws IllegalArgumentException, NullPointerException {
@@ -47,7 +47,7 @@ public class FareCalculatorService {
       }
     }
 
-    ticket.setPrice(price);
+    ticket.setPrice(Precision.round(price, 2));
   }
 
   /**
@@ -55,7 +55,7 @@ public class FareCalculatorService {
    * hours passed. If the duration is less than one hour, the return value is the
    * fraction of the passed hour.
    * 
-   * 
+
    * @param inTime  for the calculate duration
    * @param outTime for the calculate duration
    * @return duration
