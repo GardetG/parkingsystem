@@ -3,6 +3,8 @@ package com.parkit.parkingsystem.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import org.apache.commons.math3.util.Precision;
+
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
@@ -47,7 +49,7 @@ public class FareCalculatorService {
       }
     }
 
-    ticket.setPrice(price);
+    ticket.setPrice(Precision.round(price, 2));
   }
 
   /**

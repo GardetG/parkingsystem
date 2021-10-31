@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 
+import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -67,6 +68,7 @@ class FareCalculatorServiceTest {
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
       double expectedFare = expectedMultiplier * Fare.BIKE_RATE_PER_HOUR;
+      expectedFare = Precision.round(expectedFare, 2);
 
       // WHEN
       fareCalculatorService.calculateFare(ticket);
@@ -87,6 +89,7 @@ class FareCalculatorServiceTest {
       ticket.setInTime(inTime);
       ticket.setParkingSpot(parkingSpot);
       double expectedFare = expectedMultiplier * Fare.CAR_RATE_PER_HOUR;
+      expectedFare = Precision.round(expectedFare, 2);
 
       // WHEN
       fareCalculatorService.calculateFare(ticket);
@@ -109,6 +112,7 @@ class FareCalculatorServiceTest {
       lenient().when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
       double expectedFare = expectedMultiplier * Fare.BIKE_RATE_PER_HOUR;
       expectedFare -= expectedFare * 5.0 / 100;
+      expectedFare = Precision.round(expectedFare, 2);
 
       // WHEN
       fareCalculatorService.calculateFare(ticket);
@@ -131,6 +135,7 @@ class FareCalculatorServiceTest {
       lenient().when(userSurveyService.isRecurringUser(anyString())).thenReturn(true);
       double expectedFare = expectedMultiplier * Fare.CAR_RATE_PER_HOUR;
       expectedFare -= expectedFare * 5.0 / 100;
+      expectedFare = Precision.round(expectedFare, 2);
 
       // WHEN
       fareCalculatorService.calculateFare(ticket);

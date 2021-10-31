@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 
+import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,6 +103,7 @@ class ParkingDataBaseIT {
     ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
             userSurveyService, parkingSpotDAO, ticketDAO);
     double expectedFare = Fare.CAR_RATE_PER_HOUR;
+    expectedFare = Precision.round(expectedFare, 2);
 
     // WHEN
     parkingService.processExitingVehicle();
@@ -171,6 +173,7 @@ class ParkingDataBaseIT {
     ParkingService parkingService = new ParkingService(inputReaderUtil, fareCalculatorService,
             userSurveyService, parkingSpotDAO, ticketDAO);
     double expectedFare = Fare.CAR_RATE_PER_HOUR - (Fare.CAR_RATE_PER_HOUR * 5.0 / 100);
+    expectedFare = Precision.round(expectedFare, 2);
     // Expected a 5% discount
 
     // WHEN
