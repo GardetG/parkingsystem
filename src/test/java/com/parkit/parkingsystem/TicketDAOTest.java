@@ -8,6 +8,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.parkit.parkingsystem.config.DataBaseConfig;
+import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.dao.TicketDAO;
+import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.model.Ticket;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -23,15 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.parkit.parkingsystem.config.DataBaseConfig;
-import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.constants.ParkingType;
-import com.parkit.parkingsystem.dao.TicketDAO;
-import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
-
-import nl.altindag.log.LogCaptor;
 
 @ExtendWith(MockitoExtension.class)
 class TicketDAOTest {
@@ -52,8 +49,7 @@ class TicketDAOTest {
   @BeforeEach
   private void setUpPerTest() throws Exception {
     ticket = new Ticket();
-    ticketDAO = new TicketDAO();
-    ticketDAO.dataBaseConfig = dataBaseConfig;
+    ticketDAO = new TicketDAO(dataBaseConfig);
     try {
       when(connection.prepareStatement(anyString())).thenReturn(ps);
       when(dataBaseConfig.getConnection()).thenReturn(connection);
@@ -75,6 +71,7 @@ class TicketDAOTest {
       ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
       ticket.setPrice(Fare.CAR_RATE_PER_HOUR);
       ticket.setVehicleRegNumber("ABCDEF");
+      // Prepare a filled ticket
     }
 
     @DisplayName("Save a ticket with out time not null")
@@ -128,7 +125,7 @@ class TicketDAOTest {
       verify(dataBaseConfig, times(1)).closeConnection(connection);
     }
 
-    @DisplayName("Update a ticket not found")
+    @DisplayName("Update a ticket not found should return false")
     @Test
     void updateTicketNotFoundTest() {
       // GIVEN
@@ -150,7 +147,7 @@ class TicketDAOTest {
     }
   }
 
-  @DisplayName("Save a null ticket")
+  @DisplayName("Save a null ticket should return false and log error")
   @Test
   void saveNullTicketTest() {
     // GIVEN
@@ -166,7 +163,7 @@ class TicketDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
   }
 
-  @DisplayName("Save a ticket with failed database query")
+  @DisplayName("Save a ticket with SQLException should return false and log error")
   @Test
   void saveTicketWithFailedQueryTest() {
     // GIVEN
@@ -187,7 +184,7 @@ class TicketDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error saving ticket info");
   }
 
-  @DisplayName("Update a null ticket")
+  @DisplayName("Update a null ticket should return false and log error")
   @Test
   void updateNullTicketTest() {
     // GIVEN
@@ -203,7 +200,7 @@ class TicketDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating ticket info");
   }
 
-  @DisplayName("Update a ticket with failed database query")
+  @DisplayName("Update a ticket with SQLException should return false and log error")
   @Test
   void updateTicketWithFailedQueryTest() {
     // GIVEN
@@ -247,6 +244,7 @@ class TicketDAOTest {
         });
         when(rs.getInt(anyInt())).thenReturn(1);
         when(rs.getDouble(anyInt())).thenReturn(Fare.CAR_RATE_PER_HOUR);
+        // Mock rs return ticket data
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Failed to set up test mock objects");
@@ -262,6 +260,7 @@ class TicketDAOTest {
         Timestamp inTime = new Timestamp(System.currentTimeMillis() - 60 * 60 * 1000);
         Timestamp outTime = new Timestamp(System.currentTimeMillis());
         when(rs.getTimestamp(anyInt())).thenReturn(inTime).thenReturn(outTime);
+        // Mock rs return a ticket with in and out time
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Failed to set up test mock objects");
@@ -285,6 +284,7 @@ class TicketDAOTest {
         when(rs.next()).thenReturn(true);
         Timestamp inTime = new Timestamp(System.currentTimeMillis() - 60 * 60 * 1000);
         when(rs.getTimestamp(anyInt())).thenReturn(inTime).thenReturn(null);
+        // Mock rs return a ticket with in time and null out time
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Failed to set up test mock objects");
@@ -310,6 +310,7 @@ class TicketDAOTest {
         Timestamp outTime = new Timestamp(System.currentTimeMillis());
         when(rs.getTimestamp(anyInt())).thenReturn(inTime).thenReturn(outTime).thenReturn(outTime)
                 .thenReturn(inTime).thenReturn(outTime);
+        // Mock rs return 2 ticket with in and out time
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Failed to set up test mock objects");
@@ -335,6 +336,7 @@ class TicketDAOTest {
         Timestamp outTime = new Timestamp(System.currentTimeMillis());
         when(rs.getTimestamp(anyInt())).thenReturn(inTime).thenReturn(outTime).thenReturn(outTime)
                 .thenReturn(inTime).thenReturn(null);
+        // Mock rs return 2 ticket, the second of which has a null out time
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException("Failed to set up test mock objects");
@@ -351,13 +353,14 @@ class TicketDAOTest {
     }
   }
 
-  @DisplayName("Fetch ticket when no ticket found")
+  @DisplayName("Fetch ticket when no ticket found should return a null ticket")
   @Test
   void getTicketWhenNoTicketFoundTest() {
     // GIVEN
     try {
       when(ps.executeQuery()).thenReturn(rs);
       when(rs.next()).thenReturn(false);
+      // Mock rs empty
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
@@ -373,7 +376,7 @@ class TicketDAOTest {
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
-  @DisplayName("Fetch ticket with failed database query")
+  @DisplayName("Fetch ticket with SQLException should return null ticket and log error")
   @Test
   void getTicketWithFailedQueryTest() {
     // GIVEN
@@ -395,7 +398,7 @@ class TicketDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error fetching ticket info");
   }
 
-  @DisplayName("Fetch all ticket when no tickets found")
+  @DisplayName("Fetch all ticket when no tickets found should return an empty list")
   @Test
   void getAllTicketWithNoTicketFoundTest() {
     // GIVEN
@@ -411,13 +414,13 @@ class TicketDAOTest {
     List<Ticket> allTickets = ticketDAO.getAllTickets("ABCDEF");
 
     // THEN
-    assertThat(allTickets.size()).isZero();
+    assertThat(allTickets.isEmpty()).isTrue();
     verify(dataBaseConfig, times(1)).closeResultSet(rs);
     verify(dataBaseConfig, times(1)).closePreparedStatement(ps);
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
-  @DisplayName("Fetch all tickets with failed database query")
+  @DisplayName("Fetch all tickets with SQLException should return an empty list")
   @Test
   void getAllTicketWithFailedQueryTest() {
     // GIVEN

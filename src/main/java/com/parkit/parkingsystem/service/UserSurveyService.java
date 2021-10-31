@@ -1,10 +1,9 @@
 package com.parkit.parkingsystem.service;
 
-import java.util.List;
-import java.util.Objects;
-
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.Ticket;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Service Class handling the fetching of data on users.

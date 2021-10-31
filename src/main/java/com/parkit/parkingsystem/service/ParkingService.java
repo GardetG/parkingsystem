@@ -1,16 +1,14 @@
 package com.parkit.parkingsystem.service;
 
-import java.time.LocalDateTime;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.util.InputReaderUtil;
+import java.time.LocalDateTime;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Service Class processing the incoming and exiting vehicle according to user
@@ -63,8 +61,8 @@ public class ParkingService {
         ticketDAO.saveTicket(ticket);
         System.out.println("Generated Ticket and saved in DB");
         if (userSurveyService.isRecurringUser(vehicleRegNumber)) {
-          System.out.println(
-                  "Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+          System.out.println( "Welcome back!");
+          System.out.println("As a recurring user of our parking lot, you'll benefit from a 5% discount.");
           logger.info("Recurring user incomming");
         }
         System.out.println("Please park your vehicle in spot number:" + parkingSpot.getId());

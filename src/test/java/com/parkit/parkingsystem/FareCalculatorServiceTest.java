@@ -4,12 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import com.parkit.parkingsystem.constants.Fare;
+import com.parkit.parkingsystem.constants.ParkingType;
+import com.parkit.parkingsystem.model.ParkingSpot;
+import com.parkit.parkingsystem.model.Ticket;
+import com.parkit.parkingsystem.service.FareCalculatorService;
+import com.parkit.parkingsystem.service.UserSurveyService;
 import java.time.LocalDateTime;
-
 import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,13 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.parkit.parkingsystem.constants.Fare;
-import com.parkit.parkingsystem.constants.ParkingType;
-import com.parkit.parkingsystem.model.ParkingSpot;
-import com.parkit.parkingsystem.model.Ticket;
-import com.parkit.parkingsystem.service.FareCalculatorService;
-import com.parkit.parkingsystem.service.UserSurveyService;
 
 @ExtendWith(MockitoExtension.class)
 class FareCalculatorServiceTest {
@@ -58,7 +53,7 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate bike fare")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
-            + Fare.BIKE_RATE_PER_HOUR)
+            + Fare.BIKE_RATE_PER_HOUR + " or 0.0 for less than 30 minutes")
     @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBike(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
@@ -79,7 +74,7 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate car fare")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
-            + Fare.CAR_RATE_PER_HOUR)
+            + Fare.CAR_RATE_PER_HOUR + " or 0.0 for less than 30 minutes")
     @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCar(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
@@ -100,7 +95,7 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate bike fare for a recurring user")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
-            + Fare.BIKE_RATE_PER_HOUR + "minus 5%")
+            + Fare.BIKE_RATE_PER_HOUR + " minus 5% or 0.0 for less than 30 minutes")
     @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBikeRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
@@ -123,7 +118,7 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate car fare for a recurring user")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
-            + Fare.CAR_RATE_PER_HOUR + "minus 5%")
+            + Fare.CAR_RATE_PER_HOUR + " minus 5% or 0.0 for less than 30 minutes")
     @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCarRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
@@ -238,7 +233,7 @@ class FareCalculatorServiceTest {
       assertThat(actualDuration).isEqualTo(expectedDuration);
     }
 
-    @DisplayName("calculate duration futur in time should throws an exception")
+    @DisplayName("calculate duration with futur in time should throws an exception")
     @Test
     void calculateDurationWithFutureInTime() {
       // GIVEN
@@ -254,7 +249,7 @@ class FareCalculatorServiceTest {
               .hasMessageContaining("Out time provided is incorrect:");
     }
 
-    @DisplayName("calculate duration when out time is null should throws an exception")
+    @DisplayName("Calculate duration with out time null should throws an exception")
     @Test
     void calculateDurationWithOutTimeNull() {
       // GIVEN
@@ -270,7 +265,7 @@ class FareCalculatorServiceTest {
               .hasMessageContaining("Out time provided is incorrect:null");
     }
 
-    @DisplayName("calculate duration when in time is null should throws an exception")
+    @DisplayName("Calculate duration with in time null should throws an exception")
     @Test
     void calculateDurationWithInTimeNull() {
       // GIVEN

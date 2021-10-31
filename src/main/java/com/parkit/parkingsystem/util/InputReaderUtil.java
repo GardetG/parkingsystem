@@ -1,7 +1,6 @@
 package com.parkit.parkingsystem.util;
 
 import java.util.Scanner;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +37,7 @@ public class InputReaderUtil {
    * 
 
    * @return String associated to vehicle registration number.
-   * @throws IllegalArgumentException
+   * @throws IllegalArgumentException if invalid input provide
    */
   public String readVehicleRegistrationNumber() throws IllegalArgumentException {
     try {

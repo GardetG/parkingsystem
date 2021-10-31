@@ -2,28 +2,27 @@ package com.parkit.parkingsystem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.parkit.parkingsystem.config.DataBaseConfig;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.model.ParkingSpot;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import nl.altindag.log.LogCaptor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ParkingSpotDAOTest {
@@ -42,17 +41,20 @@ class ParkingSpotDAOTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    parkingSpotDAO = new ParkingSpotDAO();
-    parkingSpotDAO.dataBaseConfig = dataBaseConfig;
+    parkingSpotDAO = new ParkingSpotDAO(dataBaseConfig);
     when(dataBaseConfig.getConnection()).thenReturn(connection);
+    logCaptor = LogCaptor.forName("ParkingSpotDAO");
+    logCaptor.setLogLevelToInfo();
   }
 
+  @DisplayName("Succesful update parking spot should return true")
   @Test
   void updateParkingTest() {
     // GIVEN
     try {
       when(connection.prepareStatement(anyString())).thenReturn(ps);
       when(ps.executeUpdate()).thenReturn(1);
+      // Mock ps update one line in DB
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
@@ -68,12 +70,14 @@ class ParkingSpotDAOTest {
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
+  @DisplayName("Failed update parking spot should return false")
   @Test
   void updateParkingWhenParkingSpotNotFoundTest() {
     // GIVEN
     try {
       when(connection.prepareStatement(anyString())).thenReturn(ps);
       when(ps.executeUpdate()).thenReturn(0);
+      // Mock ps update 0 line in DB
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
@@ -89,6 +93,7 @@ class ParkingSpotDAOTest {
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
+  @DisplayName("Update null parking spot should return false and log error")
   @Test
   void updateWithNullParkingTest() {
     // GIVEN
@@ -98,8 +103,6 @@ class ParkingSpotDAOTest {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
     }
-    logCaptor = LogCaptor.forName("ParkingSpotDAO");
-    logCaptor.setLogLevelToInfo();
     ParkingSpot parkingSpot = null;
 
     // WHEN
@@ -112,6 +115,7 @@ class ParkingSpotDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating parking info");
   }
 
+  @DisplayName("Update when SQLException occured should return false and log error")
   @Test
   void updateParkingWithFailedQueryTest() {
     // GIVEN
@@ -121,8 +125,6 @@ class ParkingSpotDAOTest {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
     }
-    logCaptor = LogCaptor.forName("ParkingSpotDAO");
-    logCaptor.setLogLevelToInfo();
     ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, true);
 
     // WHEN
@@ -135,6 +137,7 @@ class ParkingSpotDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error updating parking info");
   }
 
+  @DisplayName("Get next available slot successfully")
   @Test
   void getNextAvailableSlotTest() {
     // GIVEN
@@ -142,7 +145,8 @@ class ParkingSpotDAOTest {
       when(connection.prepareStatement(anyString())).thenReturn(ps);
       when(ps.executeQuery()).thenReturn(rs);
       when(rs.next()).thenReturn(true);
-      when(rs.getInt(1)).thenReturn(1);
+      when(rs.getInt(anyInt())).thenReturn(1);
+      // Mock rs return slot 1
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
@@ -158,6 +162,7 @@ class ParkingSpotDAOTest {
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
+  @DisplayName("Get next available slot when no availble slot found should return -1")
   @Test
   void getNextAvailableSlotWhenNoAvailableSlotTest() {
     // GIVEN
@@ -165,6 +170,7 @@ class ParkingSpotDAOTest {
       when(connection.prepareStatement(anyString())).thenReturn(ps);
       when(ps.executeQuery()).thenReturn(rs);
       when(rs.next()).thenReturn(false);
+      // Mock rs empty
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException("Failed to set up test mock objects");
@@ -180,6 +186,7 @@ class ParkingSpotDAOTest {
     verify(dataBaseConfig, times(1)).closeConnection(connection);
   }
 
+  @DisplayName("Get next available slot when SQLException occured should return -1 and log error")
   @Test
   void getNextAvailableSlotWithFailedQueryTest() {
     // GIVEN
