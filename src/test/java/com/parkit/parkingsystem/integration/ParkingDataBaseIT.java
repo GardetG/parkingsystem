@@ -105,6 +105,7 @@ class ParkingDataBaseIT {
             .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF", expectedFare);
     assertThat(savedTicket.getInTime()).isNotNull();
     assertThat(savedTicket.getOutTime()).isNotNull();
+    assertThat(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).isEqualTo(1);
   }
 
   @DisplayName("Exiting a car parked for less than 30 minutes")
@@ -135,6 +136,7 @@ class ParkingDataBaseIT {
             .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF", expectedFare);
     assertThat(savedTicket.getInTime()).isNotNull();
     assertThat(savedTicket.getOutTime()).isNotNull();
+    assertThat(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).isEqualTo(1);
   }
 
   @DisplayName("Exiting a recurring user's car parked for one hour ")
@@ -176,5 +178,6 @@ class ParkingDataBaseIT {
             .containsExactly(new ParkingSpot(1, ParkingType.CAR, false), "ABCDEF", expectedFare);
     assertThat(savedTicket.getInTime()).isNotNull();
     assertThat(savedTicket.getOutTime()).isNotNull();
+    assertThat(parkingSpotDAO.getNextAvailableSlot(ParkingType.CAR)).isEqualTo(1);
   }
 }

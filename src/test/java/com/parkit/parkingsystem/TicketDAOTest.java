@@ -300,9 +300,9 @@ class TicketDAOTest {
       verify(dataBaseConfig, times(1)).closeConnection(connection);
     }
 
-    @DisplayName("Fetch all ticket with out time not null")
+    @DisplayName("Fetch all tickets with out time not null")
     @Test
-    void getAllTicketTest() {
+    void getAllTicketsTest() {
       // GIVEN
       try {
         when(rs.next()).thenReturn(true).thenReturn(true).thenReturn(false);
@@ -326,9 +326,9 @@ class TicketDAOTest {
       verify(dataBaseConfig, times(1)).closeConnection(connection);
     }
 
-    @DisplayName("Fetch all ticket with one with out time null")
+    @DisplayName("Fetch all tickets with one with out time null")
     @Test
-    void getAllTicketWithOutTimeNullTest() {
+    void getAllTicketsWithOutTimeNullTest() {
       // GIVEN
       try {
         when(rs.next()).thenReturn(true).thenReturn(true).thenReturn(false);
@@ -398,9 +398,9 @@ class TicketDAOTest {
     assertThat(logCaptor.getErrorLogs()).containsExactly("Error fetching ticket info");
   }
 
-  @DisplayName("Fetch all ticket when no tickets found should return an empty list")
+  @DisplayName("Fetch all tickets when no ticket found should return an empty list")
   @Test
-  void getAllTicketWithNoTicketFoundTest() {
+  void getAllTicketsWithNoTicketFoundTest() {
     // GIVEN
     try {
       when(ps.executeQuery()).thenReturn(rs);
@@ -422,7 +422,7 @@ class TicketDAOTest {
 
   @DisplayName("Fetch all tickets with SQLException should return an empty list")
   @Test
-  void getAllTicketWithFailedQueryTest() {
+  void getAllTicketsWithFailedQueryTest() {
     // GIVEN
     try {
       when(connection.prepareStatement(anyString())).thenThrow(SQLException.class);

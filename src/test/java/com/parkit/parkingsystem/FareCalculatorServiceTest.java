@@ -53,8 +53,8 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate bike fare")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
-            + Fare.BIKE_RATE_PER_HOUR + " or 0.0 for less than 30 minutes")
-    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
+            + Fare.BIKE_RATE_PER_HOUR)
+    @CsvSource({ "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBike(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -74,8 +74,8 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate car fare")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
-            + Fare.CAR_RATE_PER_HOUR + " or 0.0 for less than 30 minutes")
-    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
+            + Fare.CAR_RATE_PER_HOUR)
+    @CsvSource({ "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCar(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -95,8 +95,8 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate bike fare for a recurring user")
     @ParameterizedTest(name = "Bike fare for {0} minutes should equal to {1} * "
-            + Fare.BIKE_RATE_PER_HOUR + " minus 5% or 0.0 for less than 30 minutes")
-    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
+            + Fare.BIKE_RATE_PER_HOUR + " minus 5%")
+    @CsvSource({ "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareBikeRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -118,8 +118,8 @@ class FareCalculatorServiceTest {
 
     @DisplayName("Calculate car fare for a recurring user")
     @ParameterizedTest(name = "Car fare for {0} minutes should equal to {1} *"
-            + Fare.CAR_RATE_PER_HOUR + " minus 5% or 0.0 for less than 30 minutes")
-    @CsvSource({ "0,0", "15,0", "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
+            + Fare.CAR_RATE_PER_HOUR + " minus 5%")
+    @CsvSource({ "30,0.5", "45,0.75", "60,1", "90,1.5", "1440,24" })
     void calculateFareCarRecurringUser(int numberOfMinutes, double expectedMultiplier) {
       // GIVEN
       inTime = outTime.minusMinutes(numberOfMinutes);
@@ -137,6 +137,25 @@ class FareCalculatorServiceTest {
 
       // THEN
       assertThat(ticket.getPrice()).isEqualTo(expectedFare);
+    }
+
+    @DisplayName("Calculate fare for less than 30minutes")
+    @ParameterizedTest(name = "{0} Fare for {1} minutes should be free")
+    @CsvSource({ "Car,0", "Car,15", "Car,29", "Bike,0", "Bike,15", "Bike,29" })
+    void calculateFareLessThan30Minutes(String typeVehicle, int numberOfMinutes) {
+      // GIVEN
+      inTime = outTime.minusMinutes(numberOfMinutes);
+      ParkingType parkingType = ParkingType.valueOf(typeVehicle.toUpperCase());
+      ParkingSpot parkingSpot = new ParkingSpot(1, parkingType, false);
+
+      ticket.setInTime(inTime);
+      ticket.setParkingSpot(parkingSpot);
+
+      // WHEN
+      fareCalculatorService.calculateFare(ticket);
+
+      // THEN
+      assertThat(ticket.getPrice()).isZero();
     }
 
     @DisplayName("Calculate fare with future in time")

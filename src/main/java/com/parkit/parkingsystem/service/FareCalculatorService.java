@@ -52,8 +52,8 @@ public class FareCalculatorService {
 
   /**
    * Calculate the duration between in time and out time and return the number of
-   * hours passed. If the duration is less than one hour, the return value is the
-   * fraction of the passed hour.
+   * hours passed. The returned duration could be a decimal number representing
+   * the fraction passed hour.
    * 
 
    * @param inTime  for the calculate duration

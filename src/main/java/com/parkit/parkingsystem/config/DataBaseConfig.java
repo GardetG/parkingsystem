@@ -98,7 +98,7 @@ public class DataBaseConfig {
    * @param path of the configuration file
    * @return map containing login credentials
    */
-  public Map<String, String> getIdentification(String path) {
+  protected Map<String, String> getIdentification(String path) {
 
     Properties properties = new Properties();
     Map<String, String> identifiant = new HashMap<>();
