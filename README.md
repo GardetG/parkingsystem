@@ -31,7 +31,11 @@ https://maven.apache.org/install.html
 https://dev.mysql.com/downloads/mysql/
 
 After downloading the mysql 8 installer and installing it, you will be asked to configure the password for the default `root` account.
-This code uses the default root account to connect and the password can be set as `rootroot`. If you add another user/credentials make sure to change the same in the code base.
+
+### Configuring App
+
+This code uses a config.properties file located in src/main/resources to store the user account and password used to connect to the database.
+The default config file use the root account to connect and the password is set as `rootroot`. If you add another user/credentials make sure to change the same in the config file.
 
 ### Running App
 
